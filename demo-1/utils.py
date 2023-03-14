@@ -32,7 +32,6 @@ def load_array(data_arrays, batch_size, is_train=True):
     return data.DataLoader(dataset, batch_size, shuffle=is_train)
 
 
-
 def normalization(x: list):
     M, m = np.max(x), np.min(x)
     for i in range(len(x)):
