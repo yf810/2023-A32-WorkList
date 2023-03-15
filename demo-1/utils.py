@@ -64,20 +64,20 @@ def R_square(A: torch.tensor, B: torch.tensor) -> torch.float32:
     B = B.detach()
     A = A.squeeze()
     B = B.squeeze()
+    flag = len(A.shape)==3
     # batch_size * w * h
     *_, h = A.shape
-    pre_bar = torch.mean(A, dim=[0,1], keepdim=False)
-    gt_bar = torch.mean(B, dim=[0,1], keepdim=False)
-    # print(pre_bar.shape[0])
+    gt_bar = torch.mean(B, dim=[0,1] if flag else 0, keepdim=False)
 
     def sq_sum(x):
-        # print(x.shape)
         x = torch.tensor(x, dtype=torch.float32)
-        return torch.sum(x * x, dim=[0,1])
-    # print(A[:,:,1].shape, pre_bar[1].shape)
-    SST = [sq_sum(A[:,:,i] - pre_bar[i]) for i in range(h)]
-    SSR = [sq_sum(B[:,:,i] - gt_bar[i]) for i in range(h)]
-
+        return torch.sum(x * x, dim=[0,1] if flag else 0)
+    
+    SST = [sq_sum(A[:,:,i] if flag else A[:,i] - gt_bar[i]) for i in range(h)]
+    SSR = [sq_sum(B[:,:,i] if flag else A[:,i] - gt_bar[i]) for i in range(h)]
 
     return [ (SST[i] / SSR[i]) for i in range(h) ]
 
+"""
+R-squared = SSR / SST = 1 - SSE / SST
+"""
